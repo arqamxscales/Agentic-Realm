@@ -25,7 +25,7 @@ export async function requestOpenAIResponse(messages: Array<{ role: string; cont
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
-    throw new Error('OPENAI_API_KEY is missing. Add it to your local .env file.');
+    throw new Error('OPENAI_API_KEY is missing. Add it to your environment variables (local and deployment).');
   }
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
