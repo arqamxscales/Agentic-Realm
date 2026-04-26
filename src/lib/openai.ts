@@ -66,6 +66,10 @@ export async function requestOpenAIResponse(messages: Array<{ role: string; cont
       throw new Error('OPENAI_AUTH_INVALID');
     }
 
+    if (response.status === 429) {
+      throw new Error('OPENAI_QUOTA_EXCEEDED');
+    }
+
     throw new Error('OPENAI_PROVIDER_UNAVAILABLE');
   }
 
@@ -78,4 +82,92 @@ export async function requestOpenAIResponse(messages: Array<{ role: string; cont
   };
 
   return payload.choices?.[0]?.message?.content?.trim() ?? 'I could not generate a response right now.';
+}
+
+export async function requestGeminiResponse(messages: Array<{ role: string; content: string }>, systemPrompt: string) {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY_MISSING');
+  }
+
+  const geminiModel = process.env.GEMINI_MODEL ?? 'gemini-1.5-flash';
+  const transcript = [{ role: 'system', content: systemPrompt }, ...messages]
+    .map((entry) => `${entry.role.toUpperCase()}: ${entry.content}`)
+    .join('\n\n');
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: transcript }]
+          }
+        ],
+        generationConfig: {
+          temperature: 0.4
+        }
+      })
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('GEMINI_AUTH_INVALID');
+    }
+
+    if (response.status === 429) {
+      throw new Error('GEMINI_QUOTA_EXCEEDED');
+    }
+
+    if (errorText.toLowerCase().includes('quota')) {
+      throw new Error('GEMINI_QUOTA_EXCEEDED');
+    }
+
+    throw new Error('GEMINI_PROVIDER_UNAVAILABLE');
+  }
+
+  const payload = (await response.json()) as {
+    candidates?: Array<{
+      content?: {
+        parts?: Array<{
+          text?: string;
+        }>;
+      };
+    }>;
+  };
+
+  return payload.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? 'I could not generate a response right now.';
+}
+
+export async function requestModelResponse(messages: Array<{ role: string; content: string }>, systemPrompt: string) {
+  try {
+    const answer = await requestOpenAIResponse(messages, systemPrompt);
+    return {
+      answer,
+      provider: 'openai' as const
+    };
+  } catch (openaiError) {
+    const openaiReason = openaiError instanceof Error ? openaiError.message : 'OPENAI_PROVIDER_UNAVAILABLE';
+
+    try {
+      const answer = await requestGeminiResponse(messages, systemPrompt);
+      return {
+        answer,
+        provider: 'gemini' as const,
+        fallbackReason: openaiReason
+      };
+    } catch (geminiError) {
+      const geminiReason = geminiError instanceof Error ? geminiError.message : 'GEMINI_PROVIDER_UNAVAILABLE';
+      throw new Error(`${openaiReason}|${geminiReason}`);
+    }
+  }
 }

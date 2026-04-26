@@ -1,6 +1,6 @@
 # Agentic Realm
 
-Agentic Realm is a multi-domain AI web app built with Next.js, Tailwind, Supabase, and OpenAI.
+Agentic Realm is a multi-domain AI web app built with Next.js, Tailwind, Supabase, OpenAI, and Gemini fallback.
 
 It delivers six specialist agents in one white/yellow/blue interface and supports both chat and browser voice interaction.
 
@@ -11,6 +11,16 @@ It delivers six specialist agents in one white/yellow/blue interface and support
 - Authenticated cloud chat persistence with Supabase
 - Browser voice input/output for conversational workflows
 - Full multi-thread sidebar: list/create/switch conversation threads
+- Subscription-based access with field-level monthly prompt limits
+- Provider failover strategy: OpenAI primary + Gemini fallback
+
+## Subscription plans
+
+- Silver: 2 prompts per field / month
+- Gold: 10 prompts per field / month ($15/month)
+- Premium: 25 prompts per field / month ($40/month)
+
+For account activation and quick access support, contact WhatsApp: +923554776466
 
 ## Domain agents
 
@@ -44,7 +54,8 @@ Main persistence flow:
 - TypeScript strict mode
 - Tailwind CSS
 - Supabase (Auth + Postgres + RLS)
-- OpenAI Chat Completions API
+- OpenAI Chat Completions API (primary)
+- Gemini API (fallback)
 - Vercel-ready deployment
 
 ## Repository info
@@ -67,6 +78,8 @@ Copy `.env.example` to `.env.local` and fill:
 
 - `OPENAI_API_KEY`
 - `OPENAI_MODEL` (default `gpt-4o-mini`)
+- `GEMINI_API_KEY`
+- `GEMINI_MODEL` (default `gemini-1.5-flash`)
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 

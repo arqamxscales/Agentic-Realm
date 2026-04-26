@@ -330,6 +330,13 @@ export function AppShell() {
         agent?: { slug: AgentSlug; name: string };
         conversationId?: string | null;
         persisted?: boolean;
+        provider?: 'openai' | 'gemini' | 'continuity';
+        usage?: {
+          plan?: string;
+          used?: number;
+          limit?: number;
+          field?: string;
+        };
         error?: string;
       };
 
@@ -354,11 +361,18 @@ export function AppShell() {
 
       const updatedMessages = [...nextMessages, assistantMessage];
       setMessages(updatedMessages);
+      const usageBadge = data.usage ? ` • ${String(data.usage.plan ?? '').toUpperCase()} ${data.usage.used}/${data.usage.limit}` : '';
+      const providerBadge = data.provider ? ` • ${data.provider}` : '';
+
       if (data.persisted) {
-        setStatus(data.agent ? `${data.agent.name} answered • Synced to cloud` : 'Response ready • Synced to cloud');
+        setStatus(
+          data.agent
+            ? `${data.agent.name} answered${providerBadge}${usageBadge} • Synced to cloud`
+            : `Response ready${providerBadge}${usageBadge} • Synced to cloud`
+        );
         void loadConversationList(data.conversationId ?? undefined);
       } else {
-        setStatus(data.agent ? `${data.agent.name} answered` : 'Response ready');
+        setStatus(data.agent ? `${data.agent.name} answered${providerBadge}${usageBadge}` : `Response ready${providerBadge}${usageBadge}`);
       }
 
       if (voiceMode && 'speechSynthesis' in window) {
