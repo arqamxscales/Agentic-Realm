@@ -2,9 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
+import Image from 'next/image';
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { agents, type AgentSlug, getAgentBySlug } from '@/lib/agents';
 import { AuthPanel } from '@/components/auth-panel';
+import { MagicLinkHero } from '@/components/magic-link-hero';
 import { getSupabaseBrowserClient } from '@/lib/supabase/browser';
 
 type ChatEntry = {
@@ -26,7 +28,7 @@ const initialMessages: ChatEntry[] = [
     id: 'welcome',
     role: 'assistant',
     content:
-      'Welcome to Agentic Nexus. Choose a field or let auto-routing detect the best agent, then chat or use voice.'
+      'Welcome to Agentic Realm. Choose a field or let auto-routing detect the best agent, then chat or use voice.'
   }
 ];
 
@@ -170,10 +172,10 @@ export function AppShell() {
   }
 
   useEffect(() => {
-    const storedMessages = window.localStorage.getItem('agentic-nexus-messages');
-    const storedAgent = window.localStorage.getItem('agentic-nexus-agent') as AgentSlug | null;
-    const storedAutoRoute = window.localStorage.getItem('agentic-nexus-auto-route');
-    const storedVoice = window.localStorage.getItem('agentic-nexus-voice');
+    const storedMessages = window.localStorage.getItem('agentic-realm-messages');
+    const storedAgent = window.localStorage.getItem('agentic-realm-agent') as AgentSlug | null;
+    const storedAutoRoute = window.localStorage.getItem('agentic-realm-auto-route');
+    const storedVoice = window.localStorage.getItem('agentic-realm-voice');
 
     if (storedMessages) {
       try {
@@ -236,19 +238,19 @@ export function AppShell() {
       return;
     }
 
-    window.localStorage.setItem('agentic-nexus-messages', JSON.stringify(messages));
+    window.localStorage.setItem('agentic-realm-messages', JSON.stringify(messages));
   }, [isAuthenticated, messages]);
 
   useEffect(() => {
-    window.localStorage.setItem('agentic-nexus-agent', selectedAgentSlug);
+    window.localStorage.setItem('agentic-realm-agent', selectedAgentSlug);
   }, [selectedAgentSlug]);
 
   useEffect(() => {
-    window.localStorage.setItem('agentic-nexus-auto-route', String(autoRoute));
+    window.localStorage.setItem('agentic-realm-auto-route', String(autoRoute));
   }, [autoRoute]);
 
   useEffect(() => {
-    window.localStorage.setItem('agentic-nexus-voice', String(voiceMode));
+    window.localStorage.setItem('agentic-realm-voice', String(voiceMode));
   }, [voiceMode]);
 
   useEffect(() => {
@@ -402,8 +404,8 @@ export function AppShell() {
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="max-w-3xl space-y-4">
               <div className="inline-flex items-center gap-2 rounded-full border border-sky-100 bg-sky-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-sky-700">
-                <span className="h-2 w-2 rounded-full bg-sun-400" />
-                Agentic Nexus
+                <Image src="/logo.png" alt="Agentic Realm logo" width={16} height={16} className="rounded-full" />
+                Agentic Realm
               </div>
               <div className="space-y-3">
                 <h1 className="text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
@@ -433,6 +435,10 @@ export function AppShell() {
               <StatCard label="Modes" value="Chat + Voice" tone="bg-sun-50 text-slate-800" />
               <StatCard label="Deploy" value="Vercel" tone="bg-blue-50 text-blue-700" />
             </div>
+          </div>
+
+          <div className="mt-5 max-w-2xl">
+            <MagicLinkHero />
           </div>
         </section>
 

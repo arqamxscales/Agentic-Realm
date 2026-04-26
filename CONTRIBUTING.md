@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for contributing to Agentic Nexus.
+Thanks for contributing to Agentic Realm.
 
 ## Local workflow
 

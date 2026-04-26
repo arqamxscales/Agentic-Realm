@@ -96,7 +96,7 @@ export function routeAgent(query: string) {
 export function buildSystemPrompt(slug: string) {
   const agent = getAgentBySlug(slug);
   return [
-    'You are part of Agentic Nexus, a multi-agent AI assistant platform.',
+    'You are part of Agentic Realm, a multi-agent AI assistant platform.',
     `Field: ${agent.name}`,
     agent.systemPrompt,
     'If the user asks for a voice-friendly response, keep sentences crisp and conversational.'

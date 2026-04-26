@@ -4,13 +4,13 @@
 
 ```bash
 git add .
-git commit -m "Initial Agentic Nexus build"
+git commit -m "Initial Agentic Realm build"
 ```
 
 ## Recommended remote setup
 
 ```bash
-git remote add origin https://github.com/<your-org-or-username>/agentic-nexus.git
+git remote add origin https://github.com/<your-org-or-username>/agentic-realm.git
 git push -u origin main
 ```
 

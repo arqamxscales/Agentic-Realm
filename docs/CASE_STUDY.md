@@ -1,7 +1,7 @@
-# Case Study: How Agentic Nexus Helps Teams
+# Case Study: How Agentic Realm Helps Teams
 
 ## Scenario
-A small consulting company handles requests across finance, legal, technology, and media. Before Agentic Nexus, they switched tools and experts for each request, which caused delays and inconsistent recommendations.
+A small consulting company handles requests across finance, legal, technology, and media. Before Agentic Realm, they switched tools and experts for each request, which caused delays and inconsistent recommendations.
 
 ## Challenges
 
@@ -10,9 +10,9 @@ A small consulting company handles requests across finance, legal, technology, a
 - No unified conversation memory for authenticated users
 - High overhead in handoffs between team members
 
-## Solution with Agentic Nexus
+## Solution with Agentic Realm
 
-Agentic Nexus provides six specialist AI agents in one interface:
+Agentic Realm provides six specialist AI agents in one interface:
 
 1. Economics
 2. Finance
@@ -40,4 +40,4 @@ With Supabase authentication and persistence, signed-in users get cloud-stored c
 
 ## Why it matters
 
-Agentic Nexus shifts teams from disconnected, one-off prompts to a persistent, role-based intelligence workspace.
+Agentic Realm shifts teams from disconnected, one-off prompts to a persistent, role-based intelligence workspace.

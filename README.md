@@ -1,6 +1,6 @@
-# Agentic Nexus
+# Agentic Realm
 
-Agentic Nexus is a multi-domain AI web app built with Next.js, Tailwind, Supabase, and OpenAI.
+Agentic Realm is a multi-domain AI web app built with Next.js, Tailwind, Supabase, and OpenAI.
 
 It delivers six specialist agents in one white/yellow/blue interface and supports both chat and browser voice interaction.
 
@@ -49,7 +49,7 @@ Main persistence flow:
 
 ## Repository info
 
-- Recommended repo name: `agentic-nexus`
+- Recommended repo name: `agentic-realm`
 - Recommended description: Multi-domain AI agent web app with chat and browser voice assistants for economics, finance, technology, medical, law, and media.
 
 ## Project structure
@@ -122,7 +122,7 @@ Recommended post-deploy checks:
 
 ## User case study (summary)
 
-A consulting team handling cross-domain requests uses Agentic Nexus to avoid context switching between tools.
+A consulting team handling cross-domain requests uses Agentic Realm to avoid context switching between tools.
 
 Result:
 
