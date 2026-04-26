@@ -430,19 +430,6 @@ export function AppShell() {
                   Economics, finance, technology, medical, law, and media agents auto-route user questions, answer in a clean chat interface, and speak back with browser voice mode.
                 </p>
               </div>
-              <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
-                <span className="rounded-full bg-sun-100 px-3 py-1 font-medium text-slate-800">White + Yellow + Blue</span>
-                <span className="rounded-full bg-sky-100 px-3 py-1 font-medium text-slate-800">Next.js + Tailwind</span>
-                <span className="rounded-full bg-emerald-100 px-3 py-1 font-medium text-slate-800">Supabase-ready auth</span>
-                <span
-                  className={clsx(
-                    'rounded-full px-3 py-1 font-medium',
-                    isAuthenticated ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'
-                  )}
-                >
-                  {isAuthenticated ? 'Cloud history active' : 'Local history mode'}
-                </span>
-              </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3 lg:w-[28rem] lg:grid-cols-1 xl:grid-cols-3">
