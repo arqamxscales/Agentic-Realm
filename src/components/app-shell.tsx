@@ -6,6 +6,7 @@ import Image from 'next/image';
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { agents, type AgentSlug, getAgentBySlug } from '@/lib/agents';
 import { AuthPanel } from '@/components/auth-panel';
+import { InsightHub } from '@/components/insight-hub';
 import { MagicLinkHero } from '@/components/magic-link-hero';
 import { getSupabaseBrowserClient } from '@/lib/supabase/browser';
 
@@ -613,6 +614,8 @@ export function AppShell() {
 
           <div className="space-y-6">
             <AuthPanel />
+
+            <InsightHub />
 
             <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-600">How it works</p>

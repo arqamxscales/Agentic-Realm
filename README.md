@@ -13,6 +13,7 @@ It delivers six specialist agents in one white/yellow/blue interface and support
 - Full multi-thread sidebar: list/create/switch conversation threads
 - Subscription-based access with field-level monthly prompt limits
 - Provider failover strategy: OpenAI primary + Gemini fallback
+- Advanced side hub with support chatbot, weather/time, live tickers, news, and careers panel
 
 ## Subscription plans
 
