@@ -14,6 +14,8 @@ It delivers six specialist agents in one white/yellow/blue interface and support
 - Subscription-based access with field-level monthly prompt limits
 - Provider failover strategy: OpenAI primary + Gemini fallback
 - Advanced side hub with support chatbot, weather/time, live tickers, news, and careers panel
+- Real market ticker integration via Yahoo Finance API route
+- Managed support knowledge base via Supabase table and query API
 
 ## Subscription plans
 
@@ -108,6 +110,17 @@ This creates:
 - `messages`
 - RLS policies for owner-only access
 - User profile trigger on signup
+
+Then run additional migrations:
+
+- `supabase/migrations/20260426_subscription_billing.sql`
+- `supabase/migrations/20260426_support_knowledge_base.sql`
+
+This adds:
+
+- Subscription `plan` on profiles
+- Managed support knowledge base table (`public.support_knowledge_base`)
+- Public read policy for active support articles
 
 ## Deployment (Vercel)
 

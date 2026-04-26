@@ -60,6 +60,7 @@ const fallbackNews: NewsItem[] = [
 export function InsightHub() {
   const [activeTab, setActiveTab] = useState<'support' | 'market' | 'careers'>('support');
   const [supportInput, setSupportInput] = useState('');
+  const [supportLoading, setSupportLoading] = useState(false);
   const [supportMessages, setSupportMessages] = useState<Array<{ role: 'user' | 'bot'; text: string }>>([
     {
       role: 'bot',
@@ -70,6 +71,7 @@ export function InsightHub() {
   const [clock, setClock] = useState(new Date());
   const [timezone, setTimezone] = useState('Asia/Karachi');
   const [tickers, setTickers] = useState<Ticker[]>(starterTickers);
+  const [marketSource, setMarketSource] = useState('loading');
   const [news, setNews] = useState<NewsItem[]>(fallbackNews);
 
   useEffect(() => {
@@ -78,20 +80,36 @@ export function InsightHub() {
   }, []);
 
   useEffect(() => {
+    async function loadMarket() {
+      try {
+        const response = await fetch('/api/market', {
+          method: 'GET'
+        });
+
+        if (!response.ok) {
+          throw new Error('Unable to fetch market data');
+        }
+
+        const data = (await response.json()) as {
+          source?: string;
+          tickers?: Ticker[];
+        };
+
+        if (data.tickers?.length) {
+          setTickers(data.tickers);
+        }
+
+        setMarketSource(data.source ?? 'unknown');
+      } catch {
+        setMarketSource('fallback');
+      }
+    }
+
+    void loadMarket();
+
     const timer = window.setInterval(() => {
-      setTickers((current) =>
-        current.map((item) => {
-          const delta = (Math.random() - 0.5) * (item.symbol === 'BTC' ? 120 : 1.2);
-          const nextValue = Math.max(0, item.value + delta);
-          const nextChange = (delta / Math.max(item.value, 1)) * 100;
-          return {
-            ...item,
-            value: Number(nextValue.toFixed(item.symbol === 'BTC' ? 2 : 2)),
-            change: Number(nextChange.toFixed(2))
-          };
-        })
-      );
-    }, 3200);
+      void loadMarket();
+    }, 45000);
 
     return () => window.clearInterval(timer);
   }, []);
@@ -154,29 +172,54 @@ export function InsightHub() {
     void loadNews();
   }, []);
 
-  function askSupport() {
+  async function askSupport() {
     const query = supportInput.trim();
     if (!query) {
       return;
     }
 
     setSupportMessages((current) => [...current, { role: 'user', text: query }]);
-    const normalized = query.toLowerCase();
+    setSupportLoading(true);
 
-    const matched = supportFaq.find((item) =>
-      item.q
-        .toLowerCase()
-        .split(' ')
-        .some((word) => word.length > 3 && normalized.includes(word))
-    );
+    try {
+      const response = await fetch('/api/support/query', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ query })
+      });
 
-    const response = matched
-      ? matched.a
-      : 'For quick support, share your issue with plan/email on WhatsApp +923554776466. I can also help with weather, market, careers, and prompt quota questions.';
+      const data = (await response.json()) as {
+        answer?: string;
+      };
 
-    setTimeout(() => {
-      setSupportMessages((current) => [...current, { role: 'bot', text: response }]);
-    }, 180);
+      const answer =
+        data.answer ??
+        'For quick support, share your issue with plan/email on WhatsApp +923554776466. I can also help with weather, market, careers, and prompt quota questions.';
+
+      setSupportMessages((current) => [...current, { role: 'bot', text: answer }]);
+    } catch {
+      const normalized = query.toLowerCase();
+      const matched = supportFaq.find((item) =>
+        item.q
+          .toLowerCase()
+          .split(' ')
+          .some((word) => word.length > 3 && normalized.includes(word))
+      );
+
+      setSupportMessages((current) => [
+        ...current,
+        {
+          role: 'bot',
+          text:
+            matched?.a ??
+            'Support service is busy. Contact WhatsApp +923554776466 and include your account email for fast handling.'
+        }
+      ]);
+    } finally {
+      setSupportLoading(false);
+    }
 
     setSupportInput('');
   }
@@ -230,7 +273,7 @@ export function InsightHub() {
               onKeyDown={(event) => {
                 if (event.key === 'Enter') {
                   event.preventDefault();
-                  askSupport();
+                  void askSupport();
                 }
               }}
               placeholder="Ask support about plans, billing, quota..."
@@ -238,10 +281,13 @@ export function InsightHub() {
             />
             <button
               type="button"
-              onClick={askSupport}
+              onClick={() => {
+                void askSupport();
+              }}
+              disabled={supportLoading}
               className="rounded-xl bg-sky-600 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-700"
             >
-              Ask
+              {supportLoading ? 'Thinking...' : 'Ask'}
             </button>
           </div>
         </div>
@@ -275,7 +321,12 @@ export function InsightHub() {
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Live tickers</p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Live tickers</p>
+              <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                {marketSource}
+              </span>
+            </div>
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
               {tickers.map((ticker) => (
                 <div key={ticker.symbol} className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
