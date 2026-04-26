@@ -4,6 +4,28 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 export const runtime = 'nodejs';
 
+function buildContinuityFallback(agentName: string, userMessage: string, reason: string) {
+  const normalizedReason = reason.toUpperCase();
+  const outageMessage = normalizedReason.includes('OPENAI_QUOTA_EXCEEDED')
+    ? 'AI provider quota is currently exhausted.'
+    : normalizedReason.includes('OPENAI_API_KEY_MISSING') || normalizedReason.includes('OPENAI_AUTH_INVALID')
+      ? 'AI provider credentials are currently unavailable.'
+      : 'AI provider is temporarily unavailable.';
+
+  const safeSnippet = userMessage.trim().slice(0, 220) || 'your request';
+
+  return [
+    `${outageMessage} Running continuity mode so you can keep moving.`,
+    '',
+    `${agentName} quick draft for: "${safeSnippet}"`,
+    '1) Clarify scope and target outcome in one sentence.',
+    '2) List top constraints, risks, and assumptions.',
+    '3) Build a step-by-step action plan with timeline and owner.',
+    '',
+    'Retry in a few minutes for full model-generated analysis.'
+  ].join('\n');
+}
+
 export async function POST(request: Request) {
   try {
     const payload = (await request.json()) as {
@@ -14,7 +36,16 @@ export async function POST(request: Request) {
 
     const messages = payload.messages ?? [];
     const { agent, systemPrompt, messages: trimmedMessages } = createConversationContext(messages, payload.agentSlug);
-    const answer = await requestOpenAIResponse(trimmedMessages, systemPrompt);
+    const latestUserMessage = [...messages].reverse().find((message) => message.role === 'user')?.content ?? '';
+
+    let answer: string;
+
+    try {
+      answer = await requestOpenAIResponse(trimmedMessages, systemPrompt);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : 'OPENAI_PROVIDER_UNAVAILABLE';
+      answer = buildContinuityFallback(agent.name, latestUserMessage, reason);
+    }
 
     let conversationId: string | null = payload.conversationId ?? null;
     let persisted = false;
@@ -28,8 +59,6 @@ export async function POST(request: Request) {
         } = await supabase.auth.getUser();
 
         if (user) {
-          const latestUserMessage = [...messages].reverse().find((message) => message.role === 'user')?.content ?? '';
-
           if (!conversationId) {
             const { data: createdConversation, error: conversationError } = await supabase
               .from('conversations')

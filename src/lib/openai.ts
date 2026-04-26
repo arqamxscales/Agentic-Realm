@@ -25,7 +25,7 @@ export async function requestOpenAIResponse(messages: Array<{ role: string; cont
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
-    throw new Error('OPENAI_API_KEY is missing. Add it to your environment variables (local and deployment).');
+    throw new Error('OPENAI_API_KEY_MISSING');
   }
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -43,7 +43,30 @@ export async function requestOpenAIResponse(messages: Array<{ role: string; cont
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(errorText || 'OpenAI request failed.');
+    let openaiErrorCode: string | undefined;
+
+    try {
+      const parsedError = JSON.parse(errorText) as {
+        error?: {
+          code?: string;
+          type?: string;
+        };
+      };
+
+      openaiErrorCode = parsedError.error?.code ?? parsedError.error?.type;
+    } catch {
+      // Ignore JSON parse failure and map by status code below.
+    }
+
+    if (openaiErrorCode === 'insufficient_quota') {
+      throw new Error('OPENAI_QUOTA_EXCEEDED');
+    }
+
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('OPENAI_AUTH_INVALID');
+    }
+
+    throw new Error('OPENAI_PROVIDER_UNAVAILABLE');
   }
 
   const payload = (await response.json()) as {
